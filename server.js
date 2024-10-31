@@ -104,16 +104,37 @@ const server = createServer((request, response) => {
 
                 const NovoEndereco = JSON.parse(body)  //requisicao vindos do corpo da aplicaçao
 
-
-                //buscar pessoa por um id especifico
-                const buscarPessoa = Pessoas.findIndex((pessoa) => pessoa.id == idPessoa)
-
-
-                Pessoas[buscarPessoa] = {
-                    ...Pessoas[buscarPessoa],
-                    endereco: NovoEndereco
+                if(!NovoEndereco){
+                    response.writeHead(400, { 'Content-Type': 'application/json' })
+                    response.end(JSON.stringify({ message: 'Corpo da requisição vazio' }))
+                    return;
                 }
 
+                //buscar pessoa por um id especifico
+                //findIndex -> busca o indece da pessoa no array, ou seja busca a posição da pessoa no array
+                const buscarPessoa = Pessoas.findIndex((pessoa) => pessoa.id == idPessoa)
+
+                console.log(buscarPessoa,"< ===== buscar pessoa")
+
+                //validação ----------
+                if(buscarPessoa === -1 ){
+                    response.writeHead(404, { 'Content-Type': 'application/json' })
+                    response.end(JSON.stringify({ message: 'Erro ao buscar Pessoa, pessoa não existe ' }))
+                    return;
+                }
+
+                //entrar no  arquivo json Pessoas[] 
+                //buscar pessoa -> variavel que armazena a posição do array da pessoa encontrdada pelo id
+                Pessoas[buscarPessoa] = {
+                    ...Pessoas[buscarPessoa],
+                    //os tres pontos é pra selecionar todas as propriedades do objeto
+                    endereco: NovoEndereco
+                    //atualizar o endereço, para novo endereço
+                }
+
+                console.log("buscarPessoa ===>"+ buscarPessoa)
+
+                //escrever as mudanças no arquivo Json Pessoas.json
                 writeFile('Pessoas.json', JSON.stringify(Pessoas, null, 2), (err) => {
 
                     if (err) {
